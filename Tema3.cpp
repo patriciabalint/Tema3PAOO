@@ -1,91 +1,72 @@
 #include <iostream>
 #include <string>
 
+// Item 10: Operatorii de atribuire trebuie să returneze o referință la *this.
+// Item 11: Gestionează atribuirea unui obiect către el însuși în operator= (self-assignment).
+// Item 12: Copiază toate părțile unui obiect în operator= (deep copy), inclusiv în constructorul de copiere.
+
 class Car {
-private:
-    std::string model;
+    std::string model; // Modelul mașinii
     int kilometers; // Numărul de kilometri parcurși
 
 public:
-    // Constructor
-    Car(const std::string& model = "Necunoscut", int kilometers = 0)
-        : model(model), kilometers(kilometers) {}
+    // Constructor implicit
+    Car(const std::string& initialModel = "", int initialKilometers = 0)
+        : model(initialModel), kilometers(initialKilometers) {}
 
-    // Copy Constructor (Item 12: Copy all parts of an object)
+    // Constructor de copiere
     Car(const Car& other)
-        : model(other.model), kilometers(other.kilometers) {
-        std::cout << "Copy constructor apelat pentru \"" << model << "\".\n";
+        : model(other.model), kilometers(other.kilometers) { // Copiem modelul și kilometrii (Item 12)
+        std::cout << "Constructor de copiere apelat pentru '" << model << "'.\n";
     }
 
-    // Copy Assignment Operator (Item 10, 11)
+    // Operator de atribuire
     Car& operator=(const Car& other) {
-        if (this == &other) { // Handle self-assignment (Item 11)
-            return *this;
+        // Item 11: Verificare auto-atribuire
+        if (this == &other) {
+            return *this; // Întoarcem *this pentru auto-atribuire
         }
 
-        // Copierea membrilor
-        model = other.model;
-        kilometers = other.kilometers;
+        // Item 12: Copiem toate părțile obiectului
+        model = other.model; // Copiem modelul
+        kilometers = other.kilometers; // Copiem kilometrii
 
-        std::cout << "Operator= de copiere apelat pentru \"" << model << "\".\n";
-        return *this; // Return a reference to *this (Item 10)
-    }
+        std::cout << "Operator= de copiere apelat pentru '" << model << "'.\n";
 
-    // Move Constructor
-    Car(Car&& other) noexcept
-        : model(std::move(other.model)), kilometers(other.kilometers) {
-        other.kilometers = 0; // Resetăm sursa
-        std::cout << "Move constructor apelat pentru \"" << model << "\".\n";
-    }
-
-    // Move Assignment Operator
-    Car& operator=(Car&& other) noexcept {
-        if (this == &other) { // Handle self-assignment (Item 11)
-            return *this;
-        }
-
-        // Mutăm membrii
-        model = std::move(other.model);
-        kilometers = other.kilometers;
-        other.kilometers = 0;
-
-        std::cout << "Operator= de mutare apelat pentru \"" << model << "\".\n";
-        return *this; // Return a reference to *this (Item 10)
+        // Item 10: Returnăm referința la obiectul curent
+        return *this;
     }
 
     // Destructor
     ~Car() {
-        std::cout << "Destructor apelat pentru \"" << model << "\".\n";
+        std::cout << "Destructor apelat pentru '" << model << "'.\n";
     }
 
-    // Funcție de afișare
+    // Funcție pentru afișare
     void display() const {
-        std::cout << "Mașina \"" << model << "\" a parcurs " << kilometers << " kilometri.\n";
+        std::cout << "Model: " << model << ", Kilometri: " << kilometers << "\n";
     }
 };
 
 int main() {
-    Car c1("Dacia", 50000);
-    Car c2("BMW", 120000);
-
+    // Creăm un obiect Car
+    Car c1("BMW", 50000);
     c1.display();
+
+    // Copiem un obiect Car folosind constructorul de copiere
+    Car c2 = c1; // Apel constructor de copiere (Item 12)
     c2.display();
 
-    // Testare operator= (copiere)
-    c2 = c1;
-    c2.display();
-
-    // Testare constructor de copiere
-    Car c3 = c1;
+    // Creăm un alt obiect Car
+    Car c3("Audi", 80000);
     c3.display();
 
-    // Testare mutare
-    Car c4 = std::move(c3);
-    c4.display();
+    // Folosim operatorul de atribuire
+    c3 = c1; // Apel operator= (Item 10, Item 11, Item 12)
+    c3.display();
 
-    // Testare operator= (mutare)
-    c4 = std::move(c2);
-    c4.display();
+    // Testăm auto-atribuirea
+    c1 = c1; // Apel operator= pentru auto-atribuire (Item 11)
 
     return 0;
 }
